@@ -1,7 +1,9 @@
+import json
 import discord
 import requests
 
 HGKey = "SUA_KEY_HGBrasil"
+DiscordBotKey = "KEY_DISCORD_BOT"
 
 client = discord.Client()
 
@@ -16,19 +18,16 @@ async def on_message(message):
 
         response = requests.get(link)
         string = response.text
+        data = json.loads(string)
 
-        stringInArray = string.split(",")
-        intermediario = stringInArray[2].split(':')
-        erro = intermediario[2]
+        splitAtivo = str(data["results"]).split("'")
+        ativo = splitAtivo[1]
 
-        if erro == '{"error"':
-            toReturn = 'Cotação "' + ativo.upper() + '" não encontrada!'
+        if 'error' in data["results"][ativo]:
+            toReturn = 'Cotação "' + ativo + '" não encontrada!'
         else:
-            stringInArray = string.split(",")
-            price = stringInArray[14].split(':')
-            valor = price[1]
 
-            toReturn = 'Cotação ' + ativo.upper() + ': '  + valor + ' R$'
+            toReturn = 'Cotação ' + ativo + ': '  + str(data["results"][ativo]["price"]) + ' R$'
 
         return toReturn
 
@@ -44,4 +43,4 @@ async def on_message(message):
         await message.channel.send(printAtivo(message.content))
 
 
-client.run('BOT_CLIENT_ID')
+client.run(DiscordBotKey)
